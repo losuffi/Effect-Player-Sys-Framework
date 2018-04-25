@@ -6,9 +6,9 @@ using System;
 public class EffectSequence : MonoBehaviour,IStackObject
 {
     [System.Serializable]
-    private struct MatrixRow
+    public class MatrixRow
     {
-        public EffectActor[] rows;
+        public List<EffectActor> rows;
         public EffectActor this[int index]
         {
             get
@@ -20,8 +20,12 @@ public class EffectSequence : MonoBehaviour,IStackObject
         {
             get
             {
-                return rows.Length;
+                return rows.Count;
             }
+        }
+        public MatrixRow()
+        {
+            rows = new List<EffectActor>();
         }
     }
     [SerializeField]
@@ -163,18 +167,24 @@ public class EffectSequence : MonoBehaviour,IStackObject
     {
         Destroy(gameObject);
     }
-}
 
-[System.Serializable]
-public class EffectActor
-{
-    public Action<EffectActor> onActiveFalseFeedBack;
-    public EffectAdaptor Adaptor;
-
-    public virtual void SetActive(bool isTrigger)
+    #region Editor Use
+    public List<MatrixRow> GetMatrix()
     {
-
+        if (matrix == null)
+        {
+            matrix = new List<MatrixRow>();
+        }
+        return matrix;
     }
+    public MatrixRow AddSequence()
+    {
+        MatrixRow temp = new MatrixRow();
+        matrix.Add(temp);
+        return temp;
+    }
+    #endregion
 }
+
 
 
