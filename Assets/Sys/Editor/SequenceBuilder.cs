@@ -1,8 +1,8 @@
-﻿using UnityEngine;
-using UnityEditor;
+﻿using System;
 using System.Collections.Generic;
-using System;
 using System.Linq;
+using UnityEditor;
+using UnityEngine;
 
 public partial class SequenceBuilder : EditorWindow
 {
@@ -12,6 +12,7 @@ public partial class SequenceBuilder : EditorWindow
         SequenceBuilder w = EditorWindow.GetWindow<SequenceBuilder>();
         w.Show();
     }
+
     public static void OtherCall(EffectSequence s)
     {
         SequenceBuilder w = EditorWindow.GetWindow<SequenceBuilder>();
@@ -23,6 +24,7 @@ public partial class SequenceBuilder : EditorWindow
     private EffectSequence sequence;
     private List<EffectActor> HeadersSource;
     private EffectActor SelectedSource;
+
     private void OnGUI()
     {
         GUILayout.Label("--------目标-------------");
@@ -44,6 +46,7 @@ public partial class SequenceBuilder : EditorWindow
         SourceView();
         GUILayout.Label("----------------------------");
     }
+
     private bool HasTargetView()
     {
         GUILayout.Label("Target:");
@@ -79,10 +82,9 @@ public partial class SequenceBuilder : EditorWindow
         }
         GUILayout.Label("当前选中：");
         GUILayout.Label(SelectedSource == null ? "空" : SelectedSource.Name);
-
     }
 
-    private Rect RelRect(float x,float y, float width,float height)
+    private Rect RelRect(float x, float y, float width, float height)
     {
         return (new Rect(x * EditorGUIUtility.currentViewWidth, y * EditorGUIUtility.currentViewWidth,
             width * EditorGUIUtility.currentViewWidth, height * EditorGUIUtility.currentViewWidth));
@@ -97,6 +99,7 @@ public partial class SequenceBuilder : EditorWindow
     private int index;
     private EffectActor probe;
     private string Name;
+
     private void ActorEditorInit()
     {
         content = new List<EffectActor>();
@@ -109,7 +112,16 @@ public partial class SequenceBuilder : EditorWindow
                 foreach (Type type in assembly.GetTypes().Where(res => !res.IsAbstract && res.IsClass && res.IsSubclassOf(typeof(EffectActor))))
                 {
                     ActorType.Add(type);
-                    _typeNames.Add(type.Name);
+                    object[] attrs = type.GetCustomAttributes(true);
+                    EActorAttribute ea = attrs.FirstOrDefault(res => res.GetType() == typeof(EActorAttribute)) as EActorAttribute;
+                    if (ea != null)
+                    {
+                        _typeNames.Add(ea.name);
+                    }
+                    else
+                    {
+                        _typeNames.Add(type.Name);
+                    }
                 }
             }
             typeNames = _typeNames.ToArray();
@@ -118,6 +130,7 @@ public partial class SequenceBuilder : EditorWindow
         header = null;
         probe = null;
     }
+
     private void ActorEditorInit(EffectActor h)
     {
         ActorEditorInit();
@@ -189,6 +202,7 @@ public partial class SequenceBuilder : EditorWindow
             }
             if (dis != null)
             {
+                content.Remove(dis);
                 GameObject.DestroyImmediate(dis.gameObject);
             }
             if (GUILayout.Button("保存当前Actor素材"))
@@ -206,9 +220,9 @@ public partial class SequenceBuilder : EditorWindow
 public partial class SequenceBuilder : EditorWindow
 {
     private EffectSequence.MatrixRow currentEffectRow;
+
     private void SequenceView()
     {
-
         if (GUILayout.Button("添加新列"))
         {
             currentEffectRow = new EffectSequence.MatrixRow();
@@ -216,14 +230,14 @@ public partial class SequenceBuilder : EditorWindow
         }
         GUILayout.BeginHorizontal();
         GUILayout.Label("当前播放列：");
-        GUILayout.Label((sequence.GetMatrix().IndexOf(currentEffectRow)+1).ToString());
+        GUILayout.Label((sequence.GetMatrix().IndexOf(currentEffectRow) + 1).ToString());
         GUILayout.EndHorizontal();
         if (currentEffectRow == null)
         {
             return;
         }
         EffectActor dis = null;
-        foreach(EffectActor h in currentEffectRow.rows)
+        foreach (EffectActor h in currentEffectRow.rows)
         {
             GUILayout.BeginHorizontal();
             GUILayout.Label(h.name);
@@ -253,12 +267,13 @@ public partial class SequenceBuilder : EditorWindow
 {
     private string[] RowsIndex;
     private int ind;
+
     private void MatrixView()
     {
         RowsIndex = new string[sequence.GetMatrix().Count];
-        for(int i = 0; i < RowsIndex.Length; i++)
+        for (int i = 0; i < RowsIndex.Length; i++)
         {
-            RowsIndex[i] = "第"+(i+1)+"列";
+            RowsIndex[i] = "第" + (i + 1) + "列";
         }
         ind = EditorGUILayout.Popup(ind, RowsIndex);
         if (GUILayout.Button("选中"))

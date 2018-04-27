@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-
-
 public abstract class EffectAdaptorUnit
 {
-
 }
+
 /// <summary>
 /// If Modify
 /// Aim: Search Performance(Data Struct)
@@ -17,6 +15,7 @@ public class EffectAdaptor
     private EffectAdaptor parent;
     public EffectAdaptor Parent { get { return parent; } }
     private List<EffectAdaptor> childs;
+
     public List<EffectAdaptor> Childs
     {
         get
@@ -28,6 +27,7 @@ public class EffectAdaptor
             return childs;
         }
     }
+
     private List<EffectAdaptorUnit> units;
 
     public EffectAdaptor(string name)
@@ -36,14 +36,17 @@ public class EffectAdaptor
         parent = null;
     }
 
-    public void AddUnit<T>(T adaptor) where T : EffectAdaptorUnit
+    public T AddUnit<T>() where T : EffectAdaptorUnit, new()
     {
         if (units == null)
         {
             units = new List<EffectAdaptorUnit>();
         }
+        T adaptor = new T();
         units.Add(adaptor);
+        return adaptor;
     }
+
     public T GetUnit<T>() where T : EffectAdaptorUnit
     {
         if (units == null)
@@ -51,7 +54,7 @@ public class EffectAdaptor
             return null;
         }
         T unit = null;
-        for(int i = 0; i < units.Count; i++)
+        for (int i = 0; i < units.Count; i++)
         {
             unit = units[i] as T;
             if (unit != null)
@@ -61,6 +64,7 @@ public class EffectAdaptor
         }
         return unit;
     }
+
     public void SetParent(EffectAdaptor parent)
     {
         this.parent = parent;
@@ -82,7 +86,7 @@ public class EffectAdaptor
             return this;
         }
         EffectAdaptor adaptor = null;
-        for(int i = 0; i < Childs.Count; i++)
+        for (int i = 0; i < Childs.Count; i++)
         {
             adaptor = Childs[i].FindAdator(name);
             if (adaptor != null)
@@ -94,3 +98,15 @@ public class EffectAdaptor
     }
 }
 
+#region AdaptorUnit
+
+public class TransformAdaptorUnit : EffectAdaptorUnit
+{
+    public Transform Parent;
+    public Space space;
+}
+public class ScaleUnit : EffectAdaptorUnit
+{
+    public float Scale;
+}
+#endregion AdaptorUnit
